@@ -1,5 +1,6 @@
 ﻿using EventLibrary.Brokers.Interfaces;
 using EventLibrary.Objects;
+using EventLibrary.Objects.Interfaces;
 using EventLibrary.Services.Foundation.Interfaces;
 using EventLibrary.Services.Processing.Interfaces;
 
@@ -8,14 +9,12 @@ namespace EventLibrary.Services.Processing
     public class EventProcessingService<T> : IEventProcessingService<T>
     {
         readonly IEventService<EventMessage<T>> eventService;
-        readonly IEventAuthorizationBroker authBroker;
+        readonly Func<IEventAuthInfo> getAuthInfo;
 
-        public EventProcessingService(
-            IEventService<EventMessage<T>> eventService,
-            IEventAuthorizationBroker authBroker)
+        public EventProcessingService(IEventService<EventMessage<T>> eventService, Func<IEventAuthInfo> getAuthInfo)
         {
             this.eventService = eventService;
-            this.authBroker = authBroker;
+            this.getAuthInfo = getAuthInfo;
         }
 
         public void ListenToEvent(string name, Func<T, ValueTask> handler) =>
@@ -27,7 +26,7 @@ namespace EventLibrary.Services.Processing
         {
             var eventMessage = new EventMessage<T>
             {
-                AuthInfo = authBroker.GetEventAuthInfo(),
+                AuthInfo = getAuthInfo(),
                 Data = data
             };
 
