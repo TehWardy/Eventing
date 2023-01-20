@@ -1,33 +1,41 @@
-﻿using EventLibrary.Services.Orchestration.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
+﻿using EventLibrary.Brokers.Interfaces;
+using EventLibrary.Objects;
+using EventLibrary.Objects.Interfaces;
+using EventLibrary.Services.Foundation;
+using EventLibrary.Services.Processing;
+using EventLibrary.Services.Processing.Interfaces;
 
 namespace EventLibrary
 {
     public class EventHub : IEventHub
     {
-        readonly IServiceProvider serviceProvider;
         readonly List<object> services = new();
+        readonly Func<IEventAuthInfo> getAuthInfo;
 
-        public EventHub(IServiceProvider serviceProvider)
+        public EventHub(Func<IEventAuthInfo> getAuthInfo)
         {
-            this.serviceProvider = serviceProvider;
             services = new List<object>();
+            this.getAuthInfo = getAuthInfo;
         }
 
-        public void ListenToEvent<T>(string name, Func<T, ValueTask> handler) => 
+        public void ListenToEvent<T>(string name, Func<T, ValueTask> handler) =>
             GetEventService<T>().ListenToEvent(name, handler);
 
         public async ValueTask RaiseEventAsync<T>(string name, T data) =>
             await GetEventService<T>().RaiseEventAsync(name, data);
 
-        IEventOrchestrationService<T> GetEventService<T>() =>
-            services.FirstOrDefault(s => s.GetType().GenericTypeArguments[0] == typeof(T)) as IEventOrchestrationService<T>
+        IEventProcessingService<T> GetEventService<T>() =>
+            services.FirstOrDefault(s => s.GetType().GenericTypeArguments[0] == typeof(T)) as IEventProcessingService<T>
                     ??
                 CreateEventService<T>();
 
-        IEventOrchestrationService<T> CreateEventService<T>()
+        IEventProcessingService<T> CreateEventService<T>()
         {
-            var service = serviceProvider.GetService<IEventOrchestrationService<T>>();
+            var service = new EventProcessingService<T>(
+                new EventService<EventMessage<T>>(new EventBroker<EventMessage<T>>()),
+                getAuthInfo
+            );
+
             services.Add(service);
             return service;
         }

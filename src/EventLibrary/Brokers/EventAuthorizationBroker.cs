@@ -5,7 +5,7 @@ namespace EventLibrary
 {
     public class EventAuthorizationBroker : IEventAuthorizationBroker
     {
-        IEventAuthInfo authInfo;
+        readonly IEventAuthInfo authInfo;
 
         public EventAuthorizationBroker(IEventAuthInfo authInfo) =>
             this.authInfo = authInfo;
