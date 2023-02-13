@@ -1,4 +1,4 @@
-﻿using EventLibrary.Brokers.Interfaces;
+using EventLibrary.Brokers.Interfaces;
 using EventLibrary.Objects;
 using EventLibrary.Objects.Interfaces;
 using EventLibrary.Services.Foundation;

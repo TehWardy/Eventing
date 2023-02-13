@@ -22,7 +22,7 @@ namespace EventLibrary.Tests
             eventProcessingService = 
                 new EventProcessingService<FakeObject>(
                     eventServiceMock.Object, 
-                    authBrokerMock.Object);
+                    authBrokerMock.Object.GetEventAuthInfo);
         }
     }
 }
