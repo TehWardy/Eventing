@@ -1,4 +1,6 @@
-﻿namespace EventLibrary.Objects
+﻿using EventLibrary.Objects.Interfaces;
+
+namespace EventLibrary.Objects
 {
     public class EventAuthInfo : IEventAuthInfo
     {
